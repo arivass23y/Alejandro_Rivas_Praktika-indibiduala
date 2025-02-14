@@ -1,3 +1,9 @@
+// Metodoak hasierasten ditugu grafikoak orrialdean sartzean agertzeko
+sortuKasuChart();
+sortuHeriotzChart();
+sortuSpainChart();
+
+// API-tik datuak lortzeko grafikoa
 async function datuakLortuGrafikoak() {
   // `fetch()` metodoa erabiltzen da HTTP eskaerak egiteko.
   // Kasu honetan, GET eskaera egiten du `https://disease.sh/v3/covid-19/countries` API helbidera.
@@ -8,14 +14,19 @@ async function datuakLortuGrafikoak() {
   return posts;
 }
 
+// Herrien 5 kasu gehien duen Chart generatzen duen metodoa 
 async function sortuKasuChart() {
   const data = await datuakLortuGrafikoak();
 
-  // Lehenengo 5 herrialdeak hartzen ditugu
-  const top5Countries = data.slice(0, 5);
+  // Gehien kasuak dituen 5 herrialdeak hartzen ditugu
+  const top5Countries = data.sort((a, b) => b.cases - a.cases).slice(0, 5);
+
+  // Filtratzen dugu beharreko datuak
   const countriesBost = top5Countries.map((item) => item.country);
   const cases = top5Countries.map((item) => item.cases);
   const casesCtx = document.getElementById("casesChart").getContext("2d");
+
+  // Hemen chart-en diseinua definitzen dugu
   new Chart(casesCtx, {
     type: "doughnut",
     data: {
@@ -38,15 +49,18 @@ async function sortuKasuChart() {
   });
 }
 
+// Heriotzaren Chart sortzeko metodoa
 async function sortuHeriotzChart() {
   const data = await datuakLortuGrafikoak();
 
   // Lehenengo 10 herrialdeak hartzen ditugu
-  const top10Countries = data.slice(0, 10);
+  const top10Countries = data.sort((a, b) => b.cases - a.cases).slice(0, 10);
 
   const countries = top10Countries.map((item) => item.country);
   const deaths = top10Countries.map((item) => item.deaths);
   const ctx = document.getElementById("deathChart").getContext("2d");
+
+  // Hemen chart-en diseinua definitzen dugu
   new Chart(ctx, {
     type: "bar",
     data: {
@@ -87,11 +101,16 @@ async function sortuHeriotzChart() {
   });
 }
 
+// España grafikoa sortzeko metodoa
 async function sortuSpainChart() {
   const data = await datuakLortuGrafikoak();
+
+  //Filtratzen dugu Spain izenekoak
   const spain = data.find((item) => item.country === "Spain");
 
   const ctx = document.getElementById("spainChart").getContext("2d");
+
+  // Hemen chart-en diseinua definitzen dugu
   new Chart(ctx, {
     type: "pie",
     data: {
@@ -113,7 +132,3 @@ async function sortuSpainChart() {
     },
   });
 }
-
-sortuKasuChart();
-sortuHeriotzChart();
-sortuSpainChart();
