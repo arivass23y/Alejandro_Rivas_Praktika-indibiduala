@@ -1,6 +1,6 @@
 async function datuakLortuGrafikoak() {
   // `fetch()` metodoa erabiltzen da HTTP eskaerak egiteko.
-  // Kasu honetan, GET eskaera egiten du `https://jsonplaceholder.typicode.com/posts` API helbidera.
+  // Kasu honetan, GET eskaera egiten du `https://disease.sh/v3/covid-19/countries` API helbidera.
   const response = await fetch("https://disease.sh/v3/covid-19/countries");
   // `response` aldagaiak erantzuna gordetzen du.
   // `await` hitz-gakoa erabiltzen da itxaroteko eskaera amaitu arte.
@@ -8,10 +8,40 @@ async function datuakLortuGrafikoak() {
   return posts;
 }
 
-async function sortuChart() {
+async function sortuKasuChart() {
   const data = await datuakLortuGrafikoak();
 
   // Lehenengo 5 herrialdeak hartzen ditugu
+  const top5Countries = data.slice(0, 5);
+  const countriesBost = top5Countries.map((item) => item.country);
+  const cases = top5Countries.map((item) => item.cases);
+  const casesCtx = document.getElementById("casesChart").getContext("2d");
+  new Chart(casesCtx, {
+    type: "doughnut",
+    data: {
+      labels: countriesBost,
+      datasets: [
+        {
+          label: "Kasuak",
+          data: cases,
+          backgroundColor: [
+            "rgb(255, 205, 86)",
+            "rgb(255, 99, 132)",
+            "rgb(54, 162, 235)",
+            "rgb(75, 192, 192)",
+            "rgb(71, 227, 105)",
+          ],
+          hoverOffset: 4,
+        },
+      ],
+    },
+  });
+}
+
+async function sortuHeriotzChart() {
+  const data = await datuakLortuGrafikoak();
+
+  // Lehenengo 10 herrialdeak hartzen ditugu
   const top10Countries = data.slice(0, 10);
 
   const countries = top10Countries.map((item) => item.country);
@@ -55,19 +85,21 @@ async function sortuChart() {
       },
     },
   });
+}
 
-  const top5Countries = data.slice(0, 5);
-  const countriesBost = top5Countries.map((item) => item.country);
-  const cases = top5Countries.map((item) => item.cases);
-  const casesCtx = document.getElementById("casesChart").getContext("2d");
-  new Chart(casesCtx, {
-    type: "doughnut",
+async function sortuSpainChart() {
+  const data = await datuakLortuGrafikoak();
+  const spain = data.find((item) => item.country === "Spain");
+
+  const ctx = document.getElementById("spainChart").getContext("2d");
+  new Chart(ctx, {
+    type: "pie",
     data: {
-      labels: countriesBost,
+      labels: ["Kasuak", "Heriotzak", "Berreskuratuak"],
       datasets: [
         {
-          label: "Kasuak",
-          data: cases,
+          label: "España datuak",
+          data: [spain.cases, spain.deaths, spain.recovered],
           backgroundColor: [
             "rgb(255, 205, 86)",
             "rgb(255, 99, 132)",
@@ -78,42 +110,10 @@ async function sortuChart() {
           hoverOffset: 4,
         },
       ],
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true,
-        },
-      },
-    },
-  });
-
-  new Chart(casesCtx, {
-    type: "radar",
-    data: {
-      labels: countriesBost,
-      datasets: [
-        {
-          label: "Kasuak",
-          data: cases,
-          backgroundColor: [
-            "rgb(255, 205, 86)",
-            "rgb(255, 99, 132)",
-            "rgb(54, 162, 235)",
-            "rgb(75, 192, 192)",
-            "rgb(71, 227, 105)",
-          ],
-          hoverOffset: 4,
-        },
-      ],
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true,
-        },
-      },
     },
   });
 }
-sortuChart();
+
+sortuKasuChart();
+sortuHeriotzChart();
+sortuSpainChart();
